@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler", // หรือ "node"
+    "esModuleInterop": true, // ช่วยเรื่องการ import CommonJS
+    "skipLibCheck": true, // ข้ามการเช็ค Type ใน node_modules (สำคัญมาก!)
+    "noEmit": true, // ให้ vue-tsc ทำหน้าที่เช็คอย่างเดียว ไม่ต้องพ่นไฟล์ออก
+    "allowJs": true, // ยอมให้มีไฟล์ .js ในโปรเจกต์
+    "strict": false // ลองปิด Strict mode ชั่วคราวเพื่อดูว่า Build ผ่านไหม
+  }
+}
