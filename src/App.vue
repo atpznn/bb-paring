@@ -372,13 +372,34 @@ function encodeStateToURL(): void {
   };
 
   const encoded = btoa(JSON.stringify(state));
-  window.location.hash = `data=${encoded}`;
+  const newHash = `data=${encoded}`;
+
+  // Force hash update
+  if (window.location.hash !== `#${newHash}`) {
+    window.location.hash = newHash;
+
+    // Mobile fallback - push state if hash doesn't work
+    setTimeout(() => {
+      if (window.location.hash !== `#${newHash}`) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("data", encoded);
+        window.history.replaceState({}, "", url);
+      }
+    }, 100);
+  }
 }
 
 function decodeStateFromURL(): boolean {
-  const hash = window.location.hash.slice(1); // Remove #
-  const params = new URLSearchParams(hash);
-  const encoded = params.get("data");
+  // Try hash first
+  const hash = window.location.hash.slice(1);
+  const hashParams = new URLSearchParams(hash);
+  let encoded = hashParams.get("data");
+
+  // Fallback to query params
+  if (!encoded) {
+    const url = new URL(window.location.href);
+    encoded = url.searchParams.get("data");
+  }
 
   if (!encoded) return false;
 
@@ -393,9 +414,27 @@ function decodeStateFromURL(): boolean {
   }
 }
 
-function shareResults(): void {
+function shareResults(event: MouseEvent): void {
   const url = new URL(window.location.href);
-  navigator.clipboard.writeText(url.toString());
+
+  // Show feedback
+  const target = event.target as HTMLButtonElement;
+  const originalText = target.textContent;
+
+  target.textContent = "คัดลอกแล้ว! ✅";
+  setTimeout(() => {
+    target.textContent = originalText;
+  }, 2000);
+
+  navigator.clipboard.writeText(url.toString()).catch(() => {
+    // Fallback for mobile
+    const textArea = document.createElement("textarea");
+    textArea.value = url.toString();
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textArea);
+  });
 }
 
 // Initialize from URL on mount
