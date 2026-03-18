@@ -128,15 +128,16 @@
             <div class="text-sm text-gray-600 mb-2">
               รอบที่ {{ selectedRound + 1 }}
             </div>
-
-            <div class="grid grid-cols-2 gap-2">
+          <div class="flex flex-col gap-2">
               <div
-                v-for="(pair, pairIndex) in selectedResult"
+                v-for="(pair, pairIndex) in selectedResult.filter(
+                  (x) => x.toString().trim() != '',
+                )"
                 :key="pairIndex"
-                class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg p-3"
+                class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-2 text-center"
               >
-                <span class="font-medium text-gray-800">
-                  {{ pair.join(" คู่กับ ") }}
+                <span class="text-sm font-medium text-gray-800">
+                  {{ pair.filter((f) => f != null).join(" คู่กับ ") }}
                 </span>
               </div>
             </div>
