@@ -93,12 +93,14 @@
 
             <div class="flex flex-col gap-2">
               <div
-                v-for="(pair, pairIndex) in result"
+                v-for="(pair, pairIndex) in result.filter(
+                  (x) => x.toString().trim() != '',
+                )"
                 :key="pairIndex"
                 class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-2 text-center"
               >
                 <span class="text-sm font-medium text-gray-800">
-                  {{ pair[0] }} คู่กับ {{ pair[1] }}
+                  {{ pair.filter((f) => f != null).join(" คู่กับ ") }}
                 </span>
               </div>
             </div>
@@ -134,7 +136,7 @@
                 class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg p-3"
               >
                 <span class="font-medium text-gray-800">
-                  {{ pair[0] }} คู่กับ {{ pair[1] }}
+                  {{ pair.join(" คู่กับ ") }}
                 </span>
               </div>
             </div>
@@ -296,6 +298,7 @@ function display<T>(data: T[][][]) {
 const generatePairingData = (userNames: string[]): any => {
   const lockPairsArray = lockPairs.value
     .split("\n")
+    .filter((x) => x.trim() === "")
     .map((line) => line.split(","))
     .map((names) => names.map((name) => name.trim()))
     .filter((names) => names.length > 0);
@@ -315,7 +318,7 @@ const generatePairs = async (): Promise<void> => {
   const users = userInput.value
     .split(/[,\n]+/)
     .map((name) => name.trim())
-    .filter((name) => name.length > 0);
+    .filter((name) => name.length > 0 || name == "");
 
   if (users.length < 2) {
     alert("กรุณาใส่ชื่อผู้เล่นอย่างน้อย 2 คน");
@@ -323,12 +326,7 @@ const generatePairs = async (): Promise<void> => {
     return;
   }
 
-  // Simulate processing time
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
-  // Call the empty function - you'll implement this
   pairingResults.value = generatePairingData(users);
-
   isGenerating.value = false;
 };
 
