@@ -372,14 +372,13 @@ function encodeStateToURL(): void {
   };
 
   const encoded = btoa(JSON.stringify(state));
-  const url = new URL(window.location.href);
-  url.searchParams.set("data", encoded);
-  window.history.replaceState({}, "", url);
+  window.location.hash = `data=${encoded}`;
 }
 
 function decodeStateFromURL(): boolean {
-  const url = new URL(window.location.href);
-  const encoded = url.searchParams.get("data");
+  const hash = window.location.hash.slice(1); // Remove #
+  const params = new URLSearchParams(hash);
+  const encoded = params.get("data");
 
   if (!encoded) return false;
 
