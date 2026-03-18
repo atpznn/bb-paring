@@ -64,12 +64,20 @@
           <h2 class="text-lg font-semibold text-gray-800">
             ผลลัพธ์การจับคู่ ({{ pairingResults.length }} รอบ)
           </h2>
-          <button
-            @click="showRandomResult"
-            class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
-          >
-            สุ่มเล่น 🎯
-          </button>
+          <div class="flex gap-2">
+            <button
+              @click="shareResults"
+              class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+            >
+              แชร์ผลลัพธ์ 🔗
+            </button>
+            <button
+              @click="showRandomResult"
+              class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
+            >
+              สุ่มเล่น 🎯
+            </button>
+          </div>
         </div>
 
         <!-- Results Cards -->
@@ -128,7 +136,7 @@
             <div class="text-sm text-gray-600 mb-2">
               รอบที่ {{ selectedRound + 1 }}
             </div>
-          <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-2">
               <div
                 v-for="(pair, pairIndex) in selectedResult.filter(
                   (x) => x.toString().trim() != '',
@@ -156,7 +164,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 
 // Types
 type Pair = [string, string];
@@ -329,6 +337,9 @@ const generatePairs = async (): Promise<void> => {
 
   pairingResults.value = generatePairingData(users);
   isGenerating.value = false;
+
+  // Encode state to URL after generating pairs
+  encodeStateToURL();
 };
 
 const showRandomResult = (): void => {
@@ -349,4 +360,47 @@ const closeDialog = (): void => {
   selectedResult.value = null;
   selectedRound.value = 0;
 };
+
+// URL state management
+function encodeStateToURL(): void {
+  if (!pairingResults.value.length) return;
+
+  const state = {
+    players: userInput.value,
+    locks: lockPairs.value,
+    results: pairingResults.value,
+  };
+
+  const encoded = btoa(JSON.stringify(state));
+  const url = new URL(window.location.href);
+  url.searchParams.set("data", encoded);
+  window.history.replaceState({}, "", url);
+}
+
+function decodeStateFromURL(): boolean {
+  const url = new URL(window.location.href);
+  const encoded = url.searchParams.get("data");
+
+  if (!encoded) return false;
+
+  try {
+    const state = JSON.parse(atob(encoded));
+    userInput.value = state.players || "";
+    lockPairs.value = state.locks || "";
+    pairingResults.value = state.results || [];
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function shareResults(): void {
+  const url = new URL(window.location.href);
+  navigator.clipboard.writeText(url.toString());
+}
+
+// Initialize from URL on mount
+onMounted(() => {
+  decodeStateFromURL();
+});
 </script>
